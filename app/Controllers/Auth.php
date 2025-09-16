@@ -6,6 +6,11 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
+/*
+* Register: name, email and password
+* Login: email and password
+*/
+
 class Auth extends BaseController
 {
     protected $userModel;
@@ -22,10 +27,11 @@ class Auth extends BaseController
         return view('auth/register');
     }
 
-    /*
-        Register User
-        Valid Email, Password must 8 length long
-    */
+    public function showLogin()
+    {
+        return view('auth/login');
+    }
+
     public function register()
     {
         $data = $this->request->getPost();
@@ -49,6 +55,45 @@ class Auth extends BaseController
         $this->userModel->insert($validData);
 
         $this->session->setFlashdata('success', 'Register user successfully...');
-        return redirect()->to('/register');
+        return redirect()->to('/login');
+    }
+
+    public function login()
+    {
+        $data = $this->request->getPost();
+
+        $rules = [
+            'email' => 'required|valid_email',
+            'password' => 'required|min_length[8]'
+        ];
+
+        if (!$this->validateData($data, $rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $validData = $this->validator->getValidated();
+
+        $user = $this->userModel->where('email', $validData['email'])->first();
+
+        if ($user && password_verify($validData['password'], $user['password'])) {
+
+            $this->session->set([
+                'user_id' => $user['user_id'],
+                'name' => $user['name'],
+                'isLoggenIn' => true,
+            ]);
+
+            $this->session->setFlashdata('success', 'Login user successfully...');
+            return redirect()->to('');
+        } else {
+            return redirect()->back()->with('errors', 'Invalid credentials');
+        }
+    }
+
+    public function logout()
+    {
+        $this->session->destroy();
+
+        return redirect()->to('/login');
     }
 }

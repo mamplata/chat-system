@@ -1,0 +1,29 @@
+<?= $this->extend('layout') ?>
+
+<?= $this->section('title') ?>
+Home
+<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
+<h2>Home</h2>
+<?php if (session()->getFlashdata('success')) : ?>
+    <div class="alert alert-success">
+        <?= esc(session()->getFlashdata('success')) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('errors')) : ?>
+    <ul>
+        <?php foreach (session()->getFlashdata('errors') as $error) : ?>
+            <li><?= esc($error) ?></li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+<form action="logout" method="post">
+    <?= csrf_field() ?>
+    <button type="submit">Logout</button>
+</form>
+<h1>
+    Welcome aboard, <?= session()->get('name') ?>!
+</h1>
+<?= $this->endSection() ?>
