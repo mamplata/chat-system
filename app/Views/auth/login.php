@@ -25,5 +25,6 @@ Login
     <label for="email">Email: <input type="email" name="email" placeholder="Email..."></label><br>
     <label for="password">Password: <input type="password" name="password" placeholder="Password..."></label><br>
     <button type="submit">Login</button>
-</form>
+</form><br>
+<a href="<?= site_url('register') ?>">Register here</a>
 <?= $this->endSection() ?>

@@ -55,7 +55,7 @@ class Auth extends BaseController
         $this->userModel->insert($validData);
 
         $this->session->setFlashdata('success', 'Register user successfully...');
-        return redirect()->to('/login');
+        return redirect()->to(site_url('login'));
     }
 
     public function login()
@@ -78,9 +78,9 @@ class Auth extends BaseController
         if ($user && password_verify($validData['password'], $user['password'])) {
 
             $this->session->set([
-                'user_id' => $user['user_id'],
+                'user_id' => $user['id'],
                 'name' => $user['name'],
-                'isLoggenIn' => true,
+                'isLoggedIn' => true,
             ]);
 
             $this->session->setFlashdata('success', 'Login user successfully...');
@@ -94,6 +94,6 @@ class Auth extends BaseController
     {
         $this->session->destroy();
 
-        return redirect()->to('/login');
+        return redirect()->to(site_url('login'));
     }
 }

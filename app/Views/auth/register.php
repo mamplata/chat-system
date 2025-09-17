@@ -27,5 +27,7 @@ Register
     <label for="password">Password: <input type="password" name="password" placeholder="Password..."></label><br>
     <label for="confirm_password">Confirm: <input type="password" name="confirm_password" placeholder="Confirm..."></label><br><br>
     <button type="submit">Register</button>
-</form>
+</form><br>
+<a href="<?= site_url('login') ?>">Go to Login</a>
+
 <?= $this->endSection() ?>
