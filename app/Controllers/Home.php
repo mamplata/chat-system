@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\ChatModel;
+use GuzzleHttp\Client;
 
 class Home extends BaseController
 {
@@ -46,6 +47,21 @@ class Home extends BaseController
             'user_id' => $user_id,
             'message' => $validData['message']
         ]);
+
+        $client = new Client();
+
+        try {
+            $payload = [
+                'user_id' => $user_id,
+                'user_name' => session()->get('name'),
+                'message' => $validData['message'],
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $client->post('http://localhost:3000/api/new-message', ['json' => $payload]);
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to notify Node.js: ' . $e->getMessage());
+        }
 
         return redirect()
             ->back()

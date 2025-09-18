@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $this->renderSection('title'); ?></title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <style>
@@ -34,6 +36,12 @@
 
     h2 {
         text-align: center;
+    }
+
+    #chat-box {
+        max-height: 50vh;
+        /* half the viewport height */
+        overflow-y: auto;
     }
 </style>
 
