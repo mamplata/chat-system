@@ -7,8 +7,10 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index', ['filter' => 'auth']);
 $routes->post('/sendMessage', 'Home::sendMessage', ['filter' => 'auth']);
+$routes->post('/sendFile', 'Home::sendFile', ['filter' => 'auth']);
 $routes->get('/register', 'Auth::showRegister');
 $routes->post('/register', 'Auth::register');
 $routes->get('/login', 'Auth::showLogin');
 $routes->post('/login', 'Auth::login');
 $routes->post('/logout', 'Auth::logout');
+$routes->get('download/(:any)', 'Download::file/$1');

@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateChatTable extends Migration
+class CreateChatsTable extends Migration
 {
    public function up()
    {
@@ -19,11 +19,10 @@ class CreateChatTable extends Migration
             "type"       => "INT",
             "constraint" => 11,
             "unsigned"   => true,
-            "null"       => false,
          ],
          "message" => [
-            "type"       => "VARCHAR",
-            "constraint" => 255,
+            "type"       => "TEXT",
+            "null" => true,
          ],
          "created_at" => [
             "type" => "DATETIME",
