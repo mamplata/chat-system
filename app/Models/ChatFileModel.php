@@ -6,13 +6,13 @@ use CodeIgniter\Model;
 
 class ChatFileModel extends Model
 {
-    protected $table            = 'chatfiles';
+    protected $table            = 'chat_files';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['chat_id', 'user_id', 'file_name', 'file_path'];
+    protected $allowedFields    = ['chat_id', 'user_id', 'file_name', 'file_path', 'file_type'];
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
 
