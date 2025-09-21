@@ -43,72 +43,76 @@ class Home extends BaseController
         return view('home', ['messages' => $messages]);
     }
 
-
     public function sendMessage()
     {
         $user_id = session()->get('user_id');
         $data = $this->request->getPost();
-
-        $rules = ['message' => 'required|max_length[100]'];
-
-        if (!$this->validateData($data, $rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        $validData = $this->validator->getValidated();
-
-        $this->chatModel->insert([
-            'user_id' => $user_id,
-            'message' => $validData['message'],
-            'created_at' => date('Y-m-d H:i:s')
-        ], true); // we ignore the returned insert ID
-
-        // Prepare payload
-        $payload = [
-            'message' => $validData['message'],
-            'user_id' => $user_id,
-            'user_name' => session()->get('name'),
-            'created_at' => date('Y-m-d H:i:s')
-        ];
-
-        // Broadcast
-        broadcastToNode($payload, 'newMessage');
-
-        return redirect()->back()->with('success', 'Message sent successfully...');
-    }
-
-    public function sendFile()
-    {
-        $user_id = session()->get('user_id');
+        $message = isset($data['message']) ? trim($data['message']) : '';
         $uploadedFiles = $this->request->getFiles();
 
-        if (empty($uploadedFiles) || !isset($uploadedFiles['files'])) {
-            return redirect()->back()->with('warning', 'No files uploaded.');
+        // Check if any actual file is uploaded
+        $hasFiles = false;
+        if (!empty($uploadedFiles['files'])) {
+            foreach ($uploadedFiles['files'] as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $hasFiles = true;
+                    break;
+                }
+            }
         }
 
-        // Save files
+        // Prevent completely empty submissions
+        if ($message === '' && !$hasFiles) {
+            return $this->response->setJSON([
+                'status' => 'warning',
+                'message' => 'Cannot send empty message.',
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+
+        // Validate message if present
+        if ($message !== '') {
+            if (!$this->validate(['message' => 'max_length[100]'])) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'errors' => $this->validator->getErrors(),
+                    'csrf_hash' => csrf_hash()
+                ]);
+            }
+        }
+
+        // Insert chat record
         $chatId = $this->chatModel->insert([
             'user_id' => $user_id,
-            'message' => null,
+            'message' => $message !== '' ? $message : null,
             'created_at' => date('Y-m-d H:i:s')
         ], true);
 
-        handleChatFiles($uploadedFiles, $chatId, $this->chatFileModel);
-
-        // Generate signed links
-        $files = generateSignedFileLinks($chatId, $this->chatFileModel);
+        // Handle files
+        $files = [];
+        if ($hasFiles) {
+            handleChatFiles($uploadedFiles, $chatId, $this->chatFileModel);
+            $files = generateSignedFileLinks($chatId, $this->chatFileModel);
+        }
 
         // Prepare payload
         $payload = [
-            'files' => $files,
-            'user_id' => $user_id,
+            'message'   => $message !== '' ? $message : null,
+            'files'     => $files,
+            'user_id'   => $user_id,
             'user_name' => session()->get('name'),
             'created_at' => date('Y-m-d H:i:s')
         ];
 
-        // Broadcast
-        broadcastToNode($payload, 'newFile');
+        // Broadcast to Node.js
+        broadcastToNode($payload);
 
-        return redirect()->back()->with('success', 'Files sent successfully...');
+        // Return success response
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Message sent successfully...',
+            'payload' => $payload,
+            'csrf_hash' => csrf_hash()
+        ]);
     }
 }
